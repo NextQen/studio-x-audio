@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio X - All-in-One Audio Processor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div class="max-w-xl w-full bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-700">
+        <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">🎶 Studio X Audio Lab</h1>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2 text-gray-300">Upload your Song (MP3/WAV)</label>
+            <input type="file" id="audioFile" accept="audio/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer">
+        </div>
+
+        <hr class="border-gray-700 my-6">
+
+        <div class="space-y-4">
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-300">1. Slowed & Reverb</h3>
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label class="text-xs text-gray-400">Speed (Slowed)</label>
+                        <input type="range" id="speed" min="0.5" max="1.0" step="0.05" value="0.85" class="w-full accent-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Reverb (Mix)</label>
+                        <input type="range" id="reverb" min="0" max="1" step="0.1" value="0.5" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-300">2. Studio EQ & Noise Control</h3>
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label class="text-xs text-gray-400">Bass Boost (EQ)</label>
+                        <input type="range" id="bass" min="-10" max="20" step="1" value="5" class="w-full accent-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Noise Reducer (Threshold)</label>
+                        <input type="range" id="noise" min="-100" max="-30" step="5" value="-60" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 flex gap-4">
+            <button id="playBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg">Play Studio Mix</button>
+            <button id="downloadBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg">Export / Download</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
