@@ -3,30 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NextGen Viewer - Premium YouTube Multi-View Dashboard with advanced audio controller.">
-    <title>NextGen Viewer | Premium Dashboard & Audio Controller</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>Studio X - All-in-One Audio Processor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
 </head>
-<body>
-    <header>
-        <h1>NextGen Viewer</h1>
-        <p>Advanced YouTube Bulk Multi-View Workspace</p>
+<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-xl w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-indigo-400 tracking-wide">🎶 Studio X Audio Lab</h1>
+            <p class="text-xs text-gray-400 mt-1">Preset Loaded: 0.8x Speed & Pitch | 70% Reverb</p>
+        </header>
         
-        <div id="ipBanner" class="ip-banner">
-            ⚠️ <span>IP Protection Active: Ensure your VPN is ON before hitting Play to bypass YT detection!</span>
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2 text-gray-300">Select Audio File (MP3, WAV, FLAC)</label>
+            <input type="file" id="audioFile" accept="audio/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer bg-gray-950 p-2 rounded-xl border border-gray-800">
         </div>
 
-        <div class="controls">
-            <input type="text" id="ytLink" placeholder="Paste YouTube Link here...">
-            <input type="number" id="tabCount" placeholder="Tabs" min="1" max="25" value="4">
-            <button onclick="addVideos()">Play Videos</button>
-            <button id="unmuteBtn" onclick="unmuteAllVideos()" style="background: linear-gradient(135deg, #00b4db, #0083b0); display: none;">🔊 Unmute All Tabs</button>
-        </div>
-    </header>
-    
-    <div id="videoContainer" class="container"></div>
+        <div class="space-y-5">
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800">
+                <h3 class="text-sm font-bold text-indigo-400 mb-3 tracking-wide uppercase">1. Slowed & Concert Reverb</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Tempo / Speed</label>
+                        <input type="range" id="speed" min="0.5" max="1.0" step="0.01" value="0.80" class="w-full accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>0.5x</span><span class="text-indigo-300 font-semibold">0.80x Active</span><span>1.0x</span></div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Reverb Size (Room Scale)</label>
+                        <input type="range" id="reverb" min="0" max="1" step="0.05" value="0.70" class="w-full accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>Dry</span><span class="text-indigo-300 font-semibold">70% Active</span><span>100%</span></div>
+                    </div>
+                </div>
+            </div>
 
-    <script src="script.js"></script>
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800">
+                <h3 class="text-sm font-bold text-indigo-400 mb-3 tracking-wide uppercase">2. 3-Band Studio Equalizer</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <label class="text-[11px] text-gray-400 block mb-1">🎸 Bass (140Hz)</label>
+                        <input type="range" id="eqBass" min="-15" max="15" step="1" value="6" class="w-full accent-indigo-500">
+                    </div>
+                    <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <label class="text-[11px] text-gray-400 block mb-1">🎤 Mid (1.1kHz)</label>
+                        <input type="range" id="eqMid" min="-15" max="15" step="1" value="0" class="w-full accent-indigo-500">
+                    </div>
+                    <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <label class="text-[11px] text-gray-400 block mb-1">✨ Treble (3.8kHz)</label>
+                        <input type="range" id="eqTreble" min="-15" max="15" step="1" value="0" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-indigo-400 tracking-wide uppercase">3. Intelligent Noise Reducer</h3>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="noiseToggle" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 peer-checked:after:bg-indigo-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-950 border border-gray-700"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="mt-8 flex gap-4">
+            <button id="playBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg">Play Preview</button>
+            <button id="downloadBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg">Export MP3</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
