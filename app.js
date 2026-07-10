@@ -12,10 +12,7 @@ function createMassiveArenaImpulse(context, duration = 5.5, decay = 2.2) {
 
     for (let i = 0; i < length; i++) {
         const percent = i / length;
-        // Slow decay curve mimics massive physical sound scattering across hundreds of meters
         const damping = Math.pow(1 - percent, decay);
-        
-        // Pseudo-random dense ambient distribution for ultra-smooth tail
         left[i] = (Math.random() * 2 - 1) * damping;
         right[i] = (Math.random() * 2 - 1) * damping;
     }
@@ -40,11 +37,11 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     const source = context.createBufferSource();
     source.buffer = buffer;
 
-    // 1. TEMPO LAYER
-    const speedVal = parseFloat(document.getElementById('speed').value);
+    // 1. TEMPO & PITCH LAYER (Enforced at exact 0.8x for both speed & pitch)
+    const speedVal = 0.80; 
     source.playbackRate.setValueAtTime(speedVal, context.currentTime);
 
-    // 2. EQUALIZER BANDS (Deep Lo-Fi Base Preset)
+    // 2. EQUALIZER BANDS
     const bassEQ = context.createBiquadFilter();
     bassEQ.type = "lowshelf";
     bassEQ.frequency.value = 140;
@@ -80,30 +77,27 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
         currentMaster = studioComp;
     }
 
-    // 4. BALANCED DRY/WET MATRIX
+    // 4. BALANCED DRY/WET MATRIX (Enforced at exact 70% Reverb)
     const dryGain = context.createGain();
     const wetGain = context.createGain();
 
-    const reverbMix = parseFloat(document.getElementById('reverb').value);
+    const reverbMix = 0.70; 
     dryGain.gain.value = 1.0; 
-    // Amplified wet signal mapping to handle the massive room size reflection power
-    wetGain.gain.value = reverbMix * 1.6; 
+    wetGain.gain.value = reverbMix * 1.6; // Scale gain for massive room reflection power
 
     // 5. CONVOLVER SPACE ENGINE
     const convolver = context.createConvolver();
     convolver.buffer = createMassiveArenaImpulse(context, 5.5, 2.2);
 
-    // Reverb Quality High & Low Filters
     const reverbHighPass = context.createBiquadFilter();
     reverbHighPass.type = "highpass";
-    reverbHighPass.frequency.value = 220; 
+    reverbHighPass.frequency.value = 180; 
 
     const reverbLowPass = context.createBiquadFilter();
     reverbLowPass.type = "lowpass";
-    // Raised to 1400Hz to capture large room air reflections properly
     reverbLowPass.frequency.value = 1400; 
 
-    // Pipeline Connections (Zero-Delay Single Vocal Structure)
+    // Connections Architecture
     currentMaster.connect(reverbHighPass);
     reverbHighPass.connect(reverbLowPass);
     reverbLowPass.connect(convolver);
@@ -111,7 +105,6 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
 
     currentMaster.connect(dryGain);
 
-    // Terminal Output
     const destination = isExporting ? context.destination : audioCtx.destination;
     dryGain.connect(destination);
     wetGain.connect(destination);
@@ -135,8 +128,8 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     downloadBtn.innerText = "Master Rendering...";
     downloadBtn.disabled = true;
 
-    const speedVal = parseFloat(document.getElementById('speed').value);
-    const renderDuration = (audioBuffer.duration / speedVal) + 8; // Extra head space for mega tail decay
+    const speedVal = 0.80;
+    const renderDuration = (audioBuffer.duration / speedVal) + 8;
 
     const offlineCtx = new OfflineAudioContext(1, renderDuration * audioBuffer.sampleRate, audioBuffer.sampleRate);
     const offlineSource = setupAudioPipeline(offlineCtx, audioBuffer, true);
@@ -159,7 +152,6 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     alert("🎉 Massive Arena Master MP3 Downloaded!");
 });
 
-// --- LAMEJS STREAM COMPRESSION ENGINE ---
 function bufferToMp3(buffer) {
     const rawAudioChannel = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
