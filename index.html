@@ -3,55 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio X - Premium Audio Lab</title>
+    <title>Studio X - All-in-One Audio Processor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-xl w-full bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-700">
-        <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">🎶 Studio X Audio Lab</h1>
+    <div class="max-w-xl w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-indigo-400 tracking-wide">🎶 Studio X Audio Lab</h1>
+            <p class="text-xs text-gray-400 mt-1">One-Click Multi-Effect Pipeline (Audioalter Specs)</p>
+        </header>
         
         <div class="mb-6">
-            <label class="block text-sm font-medium mb-2 text-gray-300">Upload your Song (MP3/WAV)</label>
-            <input type="file" id="audioFile" accept="audio/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer">
+            <label class="block text-sm font-medium mb-2 text-gray-300">Select Audio File (MP3, WAV, FLAC)</label>
+            <input type="file" id="audioFile" accept="audio/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer bg-gray-950 p-2 rounded-xl border border-gray-800">
         </div>
 
-        <hr class="border-gray-700 my-6">
-
-        <div class="space-y-4">
-            <div>
-                <h3 class="text-lg font-semibold text-indigo-300">1. Slowed & Large Studio Reverb</h3>
-                <div class="grid grid-cols-2 gap-4 mt-2">
+        <div class="space-y-5">
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800">
+                <h3 class="text-sm font-bold text-indigo-400 mb-3 tracking-wide uppercase">1. Slowed & Concert Reverb</h3>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-xs text-gray-400">Speed (0.80x is ideal for Slowed)</label>
-                        <input type="range" id="speed" min="0.5" max="1.0" step="0.02" value="0.80" class="w-full accent-indigo-500">
+                        <label class="text-xs text-gray-400 block mb-1">Tempo / Speed</label>
+                        <input type="range" id="speed" min="0.5" max="1.0" step="0.01" value="0.85" class="w-full accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>0.5x</span><span class="text-indigo-300 font-semibold">Audioalter Default (0.85x)</span><span>1.0x</span></div>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-400">Reverb Size (Deep Space)</label>
-                        <input type="range" id="reverb" min="0" max="1" step="0.05" value="0.65" class="w-full accent-indigo-500">
+                        <label class="text-xs text-gray-400 block mb-1">Reverb Size (Room Scale)</label>
+                        <input type="range" id="reverb" min="0" max="1" step="0.05" value="0.60" class="w-full accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>Dry</span><span class="text-indigo-300 font-semibold">Deep Space Tail</span><span>100% Wet</span></div>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <h3 class="text-lg font-semibold text-indigo-300">2. Premium EQ & Noise Gate</h3>
-                <div class="grid grid-cols-2 gap-4 mt-2">
-                    <div>
-                        <label class="text-xs text-gray-400">Deep Bass Boost</label>
-                        <input type="range" id="bass" min="-10" max="25" step="1" value="8" class="w-full accent-indigo-500">
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800">
+                <h3 class="text-sm font-bold text-indigo-400 mb-3 tracking-wide uppercase">2. 3-Band Studio Equalizer</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <label class="text-[11px] text-gray-400 block mb-1">🎸 Bass (150Hz)</label>
+                        <input type="range" id="eqBass" min="-15" max="15" step="1" value="6" class="w-full accent-indigo-500">
+                        <span class="text-[9px] text-gray-500">Punchy Lows</span>
                     </div>
-                    <div>
-                        <label class="text-xs text-gray-400">Noise Reducer</label>
-                        <input type="range" id="noise" min="-100" max="-30" step="5" value="-50" class="w-full accent-indigo-500">
+                    <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <label class="text-[11px] text-gray-400 block mb-1">🎤 Mid (1kHz)</label>
+                        <input type="range" id="eqMid" min="-15" max="15" step="1" value="0" class="w-full accent-indigo-500">
+                        <span class="text-[9px] text-gray-500">Vocal Clarity</span>
+                    </div>
+                    <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
+                        <label class="text-[11px] text-gray-400 block mb-1">✨ Treble (4kHz)</label>
+                        <input type="range" id="eqTreble" min="-15" max="15" step="1" value="-2" class="w-full accent-indigo-500">
+                        <span class="text-[9px] text-gray-500">Anti-Harsh</span>
                     </div>
                 </div>
+            </div>
+
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-indigo-400 tracking-wide uppercase">3. Intelligent Noise Reducer</h3>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Auto-cleans background hiss & static rumble</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="noiseToggle" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 peer-checked:after:bg-indigo-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-950 border border-gray-700"></div>
+                </label>
             </div>
         </div>
 
         <div class="mt-8 flex gap-4">
-            <button id="playBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg">Play Mix</button>
-            <button id="downloadBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg">Export MP3</button>
+            <button id="playBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg active:scale-[0.98]">Play Preview</button>
+            <button id="downloadBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg active:scale-[0.98]">Export MP3</button>
         </div>
     </div>
 
