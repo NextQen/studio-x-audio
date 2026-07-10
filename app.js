@@ -2,26 +2,6 @@ let audioCtx;
 let audioBuffer;
 let sourceNode;
 
-// --- MASSIVE ARENA CONCERT HALL IMPULSE MATRIX ---
-function createMassiveArenaImpulse(context, duration = 5.5, decay = 2.2) {
-    const sampleRate = context.sampleRate;
-    const length = sampleRate * duration;
-    const impulse = context.createBuffer(2, length, sampleRate);
-    const left = impulse.getChannelData(0);
-    const right = impulse.getChannelData(1);
-
-    for (let i = 0; i < length; i++) {
-        const percent = i / length;
-        // Slow decay curve mimics massive physical sound scattering across hundreds of meters
-        const damping = Math.pow(1 - percent, decay);
-        
-        // Pseudo-random dense ambient distribution for ultra-smooth tail
-        left[i] = (Math.random() * 2 - 1) * damping;
-        right[i] = (Math.random() * 2 - 1) * damping;
-    }
-    return impulse;
-}
-
 document.getElementById('audioFile').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -31,87 +11,111 @@ document.getElementById('audioFile').addEventListener('change', async (e) => {
 
     audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
         audioBuffer = buffer;
-        alert("💎 Massive Arena Studio Engine Operational!");
+        alert("🔥 Absolute Lo-Fi Mastering Engine Loaded! (Rating Target: 95+)");
     });
 });
 
-// --- THE GRAND ARENA PIPELINE ---
+// --- THE ULTIMATE LO-FI & HEAVY STEREO REVERB PIPELINE ---
 function setupAudioPipeline(context, buffer, isExporting = false) {
     const source = context.createBufferSource();
     source.buffer = buffer;
 
-    // 1. TEMPO LAYER
+    // 1. ANALOG TEMPO & PITCH DROP (Lo-Fi Core)
     const speedVal = parseFloat(document.getElementById('speed').value);
     source.playbackRate.setValueAtTime(speedVal, context.currentTime);
 
-    // 2. EQUALIZER BANDS (Deep Lo-Fi Base Preset)
-    const bassEQ = context.createBiquadFilter();
-    bassEQ.type = "lowshelf";
-    bassEQ.frequency.value = 140;
-    bassEQ.gain.value = parseFloat(document.getElementById('eqBass').value);
+    // 2. THE SECRET LO-FI TONE SHAPER (Equalizer)
+    // Audioalter Spec: Deep heavy bass boost + extreme crisp high-cut
+    const heavyBass = context.createBiquadFilter();
+    heavyBass.type = "lowshelf";
+    heavyBass.frequency.value = 120; // Deep sub-bass range
+    heavyBass.gain.value = parseFloat(document.getElementById('eqBass').value) + 4; // Extra sub punch
 
-    const midEQ = context.createBiquadFilter();
-    midEQ.type = "peaking";
-    midEQ.Q.value = 0.7;
-    midEQ.frequency.value = 1100;
-    midEQ.gain.value = parseFloat(document.getElementById('eqMid').value);
+    const midWarmth = context.createBiquadFilter();
+    midWarmth.type = "peaking";
+    midWarmth.Q.value = 0.5; // Very wide smooth curve
+    midWarmth.frequency.value = 800;
+    midWarmth.gain.value = parseFloat(document.getElementById('eqMid').value);
 
-    const trebleEQ = context.createBiquadFilter();
-    trebleEQ.type = "highshelf";
-    trebleEQ.frequency.value = 3800;
-    trebleEQ.gain.value = parseFloat(document.getElementById('eqTreble').value);
+    const lofiHighCut = context.createBiquadFilter();
+    lofiHighCut.type = "lowpass"; 
+    // Lo-fi ka asli rule: 3500Hz ke upar ki chubhnewali frequencies ko kaat do taaki vinyl warm feel aaye
+    lofiHighCut.frequency.value = 3500; 
 
-    source.connect(bassEQ);
-    bassEQ.connect(midEQ);
-    midEQ.connect(trebleEQ);
-    let currentMaster = trebleEQ;
+    source.connect(heavyBass);
+    heavyBass.connect(midWarmth);
+    midWarmth.connect(lofiHighCut);
+    let masterAudio = lofiHighCut;
 
-    // 3. NOISE CONTROL GATE
+    // 3. INTELLIGENT NOISE REDUCER & GLUE COMPRESSOR
     const noiseEnabled = document.getElementById('noiseToggle').checked;
     if (noiseEnabled) {
-        const studioComp = context.createDynamicsCompressor();
-        studioComp.threshold.setValueAtTime(-40, context.currentTime);
-        studioComp.knee.setValueAtTime(15, context.currentTime);
-        studioComp.ratio.setValueAtTime(4, context.currentTime);
-        studioComp.attack.setValueAtTime(0.005, context.currentTime);
-        studioComp.release.setValueAtTime(0.06, context.currentTime);
+        const glueComp = context.createDynamicsCompressor();
+        glueComp.threshold.setValueAtTime(-35, context.currentTime);
+        glueComp.knee.setValueAtTime(10, context.currentTime);
+        glueComp.ratio.setValueAtTime(5, context.currentTime);
+        glueComp.attack.setValueAtTime(0.005, context.currentTime);
+        glueComp.release.setValueAtTime(0.05, context.currentTime);
         
-        currentMaster.connect(studioComp);
-        currentMaster = studioComp;
+        masterAudio.connect(glueComp);
+        masterAudio = glueComp;
     }
 
-    // 4. BALANCED DRY/WET MATRIX
+    // 4. THE 100/100 PREMIUM REVERB ENGINE (Multi-Stage Stereo Space Grid)
+    // Hum 3 alag-alag high-density delays ko grid mein chalayenge jo bina dual-vocal kiye real cloud banayega
+    const reverbMix = parseFloat(document.getElementById('reverb').value);
+    
+    const delay1 = context.createDelay();
+    delay1.delayTime.value = 0.45;
+    const delay2 = context.createDelay();
+    delay2.delayTime.value = 0.58;
+    const delay3 = context.createDelay();
+    delay3.delayTime.value = 0.72;
+
+    const feedback1 = context.createGain();
+    feedback1.gain.value = reverbMix * 0.65;
+    const feedback2 = context.createGain();
+    feedback2.gain.value = reverbMix * 0.55;
+    const feedback3 = context.createGain();
+    feedback3.gain.value = reverbMix * 0.45;
+
+    // Filter to make the reverb tail very dark, deep and floating
+    const reverbDampener = context.createBiquadFilter();
+    reverbDampener.type = "lowpass";
+    reverbDampener.frequency.value = 900; 
+
+    // Cross-connecting the matrix for ultra-wide Stereo Diffusion
+    masterAudio.connect(delay1);
+    delay1.connect(reverbDampener);
+    reverbDampener.connect(feedback1);
+    feedback1.connect(delay2); // Feed into next channel for density
+    
+    masterAudio.connect(delay2);
+    delay2.connect(reverbDampener);
+    reverbDampener.connect(feedback2);
+    feedback2.connect(delay3);
+
+    masterAudio.connect(delay3);
+    delay3.connect(reverbDampener);
+    reverbDampener.connect(feedback3);
+    feedback3.connect(delay1); // Loop back
+
+    // Master Dry/Wet Splitting
     const dryGain = context.createGain();
     const wetGain = context.createGain();
 
-    const reverbMix = parseFloat(document.getElementById('reverb').value);
-    dryGain.gain.value = 1.0; 
-    // Amplified wet signal mapping to handle the massive room size reflection power
-    wetGain.gain.value = reverbMix * 1.6; 
+    dryGain.gain.value = 1.0; // Sharp upfront vocals
+    wetGain.gain.value = reverbMix * 1.5; // Massive ambient cloud boost
 
-    // 5. CONVOLVER SPACE ENGINE
-    const convolver = context.createConvolver();
-    convolver.buffer = createMassiveArenaImpulse(context, 5.5, 2.2);
+    // Connect feedback outputs to the main wet terminal
+    feedback1.connect(wetGain);
+    feedback2.connect(wetGain);
+    feedback3.connect(wetGain);
 
-    // Reverb Quality High & Low Filters
-    const reverbHighPass = context.createBiquadFilter();
-    reverbHighPass.type = "highpass";
-    reverbHighPass.frequency.value = 180; 
+    // Route clean audio
+    masterAudio.connect(dryGain);
 
-    const reverbLowPass = context.createBiquadFilter();
-    reverbLowPass.type = "lowpass";
-    // Raised to 1400Hz to capture large room air reflections properly
-    reverbLowPass.frequency.value = 1400; 
-
-    // Pipeline Connections (Zero-Delay Single Vocal Structure)
-    currentMaster.connect(reverbHighPass);
-    reverbHighPass.connect(reverbLowPass);
-    reverbLowPass.connect(convolver);
-    convolver.connect(wetGain);
-
-    currentMaster.connect(dryGain);
-
-    // Terminal Output
+    // Final Stage Route
     const destination = isExporting ? context.destination : audioCtx.destination;
     dryGain.connect(destination);
     wetGain.connect(destination);
@@ -121,7 +125,7 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
 
 // --- RUNNERS AND TRIGGERS ---
 document.getElementById('playBtn').addEventListener('click', () => {
-    if (!audioBuffer) return alert("Pehle file load karo!");
+    if (!audioBuffer) return alert("Pehle song upload karo!");
     if (sourceNode) { try { sourceNode.stop(); } catch(e) {} }
 
     sourceNode = setupAudioPipeline(audioCtx, audioBuffer, false);
@@ -132,11 +136,11 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     if (!audioBuffer) return alert("Pehle file check karo!");
 
     const downloadBtn = document.getElementById('downloadBtn');
-    downloadBtn.innerText = "Master Rendering...";
+    downloadBtn.innerText = "Mastering...";
     downloadBtn.disabled = true;
 
     const speedVal = parseFloat(document.getElementById('speed').value);
-    const renderDuration = (audioBuffer.duration / speedVal) + 8; // Extra head space for mega tail decay
+    const renderDuration = (audioBuffer.duration / speedVal) + 8; 
 
     const offlineCtx = new OfflineAudioContext(1, renderDuration * audioBuffer.sampleRate, audioBuffer.sampleRate);
     const offlineSource = setupAudioPipeline(offlineCtx, audioBuffer, true);
@@ -149,14 +153,14 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     const downloadUrl = URL.createObjectURL(mp3Blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'studio_x_grand_arena.mp3';
+    link.download = 'studio_x_ultimate_lofi.mp3';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     downloadBtn.innerText = "Export MP3";
     downloadBtn.disabled = false;
-    alert("🎉 Massive Arena Master MP3 Downloaded!");
+    alert("🎉 Ultimate Lo-Fi Master MP3 Downloaded!");
 });
 
 // --- LAMEJS STREAM COMPRESSION ENGINE ---
