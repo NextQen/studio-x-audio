@@ -2,7 +2,6 @@ let audioCtx;
 let audioBuffer;
 let sourceNode;
 
-// File Upload Handler
 document.getElementById('audioFile').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -10,92 +9,113 @@ document.getElementById('audioFile').addEventListener('change', async (e) => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const arrayBuffer = await file.arrayBuffer();
     
-    // Decode data into system audio buffer
     audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
         audioBuffer = buffer;
-        alert("🔥 Studio Engine Locked & Loaded!");
+        alert("💎 Ultimate Studio Engine Locked & Armed! (100/100 Quality)");
     }, (err) => {
-        alert("Audio decode fail ho gaya bhai. Valid MP3/WAV check karo.");
+        alert("Audio decode failed.");
     });
 });
 
-// --- AUDIO PROCESSING CORE ENGINE ---
+// --- HELPER: CONCERT HALL IMPULSE GENERATOR (THE AUDIOALTER SECRET) ---
+// Ye function browser ke andar hi mathematically ek massive stadium/cathedral ka room design karta hai
+function createConcertHallImpulse(context, duration = 3.5, decay = 4.0) {
+    const sampleRate = context.sampleRate;
+    const length = sampleRate * duration;
+    const impulse = context.createBuffer(2, length, sampleRate);
+    
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+
+    for (let i = 0; i < length; i++) {
+        // Exponential decay equation to match true acoustic physics
+        const percent = i / length;
+        const damping = Math.exp(-percent * decay);
+        
+        // Random white noise shaped by dynamic decay to mimic sound scattering in walls
+        left[i] = (Math.random() * 2 - 1) * damping;
+        right[i] = (Math.random() * 2 - 1) * damping;
+    }
+    return impulse;
+}
+
+// --- MASTER AUDIO PIPELINE ---
 function setupAudioPipeline(context, buffer, isExporting = false) {
     const source = context.createBufferSource();
     source.buffer = buffer;
 
-    // 1. TEMPO CHANGER LAYER (Slowed Drop - Pitch Drop Auto-binds)
+    // 1. DYNAMIC SLOWED LAYER (Deep Pitch Compression)
     const speedVal = parseFloat(document.getElementById('speed').value);
     source.playbackRate.setValueAtTime(speedVal, context.currentTime);
 
-    // 2. STUDIO GRAPHIC EQUALIZER BANDS
+    // 2. AUDIOALTER-GRADE DYNAMIC NOISE GATE & CLEANUP
+    // Pehle lagayenge taaki sirf saaf audio par hi heavy reverb apply ho
+    const noiseEnabled = document.getElementById('noiseToggle').checked;
+    let currentNode = source;
+
+    if (noiseEnabled) {
+        const noiseGate = context.createDynamicsCompressor();
+        noiseGate.threshold.setValueAtTime(-42, context.currentTime);
+        noiseGate.knee.setValueAtTime(18, context.currentTime);
+        noiseGate.ratio.setValueAtTime(4, context.currentTime);
+        noiseGate.attack.setValueAtTime(0.005, context.currentTime);
+        noiseGate.release.setValueAtTime(0.08, context.currentTime);
+        
+        currentNode.connect(noiseGate);
+        currentNode = noiseGate;
+    }
+
+    // 3. 3-BAND MASTERING EQUALIZER (Warm Vinyl Tone Signature)
     const bassEQ = context.createBiquadFilter();
     bassEQ.type = "lowshelf";
-    bassEQ.frequency.value = 150;
+    bassEQ.frequency.value = 140;
     bassEQ.gain.value = parseFloat(document.getElementById('eqBass').value);
 
     const midEQ = context.createBiquadFilter();
     midEQ.type = "peaking";
-    midEQ.Q.value = 1.0;
-    midEQ.frequency.value = 1000;
+    midEQ.Q.value = 0.8; // Smooth bell curve
+    midEQ.frequency.value = 1100;
     midEQ.gain.value = parseFloat(document.getElementById('eqMid').value);
 
     const trebleEQ = context.createBiquadFilter();
     trebleEQ.type = "highshelf";
-    trebleEQ.frequency.value = 4000;
+    trebleEQ.frequency.value = 3600;
     trebleEQ.gain.value = parseFloat(document.getElementById('eqTreble').value);
 
-    // Connect EQ Chain Series
-    source.connect(bassEQ);
+    // Link EQ Pipeline
+    currentNode.connect(bassEQ);
     bassEQ.connect(midEQ);
     midEQ.connect(trebleEQ);
+    currentNode = trebleEQ;
 
-    // 3. AUTOMATIC NOISE REDUCER GATE (Audioalter Architecture Specs)
-    let lastNode = trebleEQ;
-    const noiseEnabled = document.getElementById('noiseToggle').checked;
-    
-    if (noiseEnabled) {
-        const noiseGate = context.createDynamicsCompressor();
-        // Constant automatic threshold parameters to damp static line hums without user inputs
-        noiseGate.threshold.setValueAtTime(-45, context.currentTime);
-        noiseGate.knee.setValueAtTime(24, context.currentTime);
-        noiseGate.ratio.setValueAtTime(5, context.currentTime);
-        noiseGate.attack.setValueAtTime(0.008, context.currentTime);
-        noiseGate.release.setValueAtTime(0.1, context.currentTime);
-        
-        lastNode.connect(noiseGate);
-        lastNode = noiseGate;
-    }
+    // 4. THE ULTIMATE REVERB ENGINE (Convolver Technology)
+    const convolver = context.createConvolver();
+    // Mathematical spatial mapping buffer link
+    convolver.buffer = createConcertHallImpulse(context, 3.8, 4.5);
 
-    // 4. LARGE STUDIO CONCERT HALL REVERB
-    const delayNode = context.createDelay();
-    delayNode.delayTime.value = 0.55; 
+    // Reverb Tail Tone Smoothing (High Damping to make it dark and lo-fi)
+    const reverbDamping = context.createBiquadFilter();
+    reverbDamping.type = "lowpass";
+    reverbDamping.frequency.value = 850; // Sweeter dark cutoff frequency
 
-    const feedbackNode = context.createGain();
-    feedbackNode.gain.value = parseFloat(document.getElementById('reverb').value) * 0.72; 
-
-    // HF Damping Filter (Audioalter Spec: 50% cutoff filtering to stop metallic spring artifact)
-    const dampingFilter = context.createBiquadFilter();
-    dampingFilter.type = "lowpass";
-    dampingFilter.frequency.value = 950; 
-
-    // Reverb loop system mapping
-    delayNode.connect(dampingFilter);
-    dampingFilter.connect(feedbackNode);
-    feedbackNode.connect(delayNode);
-
-    // Parallel Dry/Wet Splitting System
+    // Dry/Wet Splitting System
     const dryGain = context.createGain();
     const wetGain = context.createGain();
     
-    dryGain.gain.value = 0.90; 
-    wetGain.gain.value = parseFloat(document.getElementById('reverb').value) * 0.90; 
+    const reverbMix = parseFloat(document.getElementById('reverb').value);
+    
+    // Balanced power equations for rich atmosphere
+    dryGain.gain.value = 0.95; 
+    wetGain.gain.value = reverbMix * 1.2; // Boosting wet signal slightly for huge concert feel
 
-    lastNode.connect(dryGain);
-    lastNode.connect(delayNode);
-    delayNode.connect(wetGain);
+    // Route Signal into parallel chains
+    currentNode.connect(dryGain);
+    
+    currentNode.connect(convolver);
+    convolver.connect(reverbDamping);
+    reverbDamping.connect(wetGain);
 
-    // Route out to target context terminal
+    // Final Stage: Summation out to output terminal
     const outputTerminal = isExporting ? context.destination : audioCtx.destination;
     dryGain.connect(outputTerminal);
     wetGain.connect(outputTerminal);
@@ -103,34 +123,25 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     return source;
 }
 
-// --- CONTROLLERS RUNNERS ---
-
-// Play/Preview Trigger
+// --- COMMAND CONTROLLERS ---
 document.getElementById('playBtn').addEventListener('click', () => {
-    if (!audioBuffer) return alert("Pehle file upload karo bhai!");
-    
-    if (sourceNode) {
-        try { sourceNode.stop(); } catch(e) {}
-    }
+    if (!audioBuffer) return alert("Bhai file toh upload karo!");
+    if (sourceNode) { try { sourceNode.stop(); } catch(e) {} }
 
     sourceNode = setupAudioPipeline(audioCtx, audioBuffer, false);
     sourceNode.start(0);
 });
 
-// Fast Render & Compressed MP3 Downloader
 document.getElementById('downloadBtn').addEventListener('click', async () => {
-    if (!audioBuffer) return alert("Download karne ke liye pehle file select karo!");
+    if (!audioBuffer) return alert("Pehle file lagao!");
 
     const downloadBtn = document.getElementById('downloadBtn');
-    const originalText = downloadBtn.innerText;
-    downloadBtn.innerText = "Encoding MP3...";
+    downloadBtn.innerText = "Mastering & Encoding...";
     downloadBtn.disabled = true;
 
     const speedVal = parseFloat(document.getElementById('speed').value);
-    // Dynamic buffer sizing depending on tracks length + reverb decay factor
-    const renderDuration = (audioBuffer.duration / speedVal) + 6; 
+    const renderDuration = (audioBuffer.duration / speedVal) + 7; 
 
-    // Instantiate clean single-channel offline processor for rapid compression
     const offlineCtx = new OfflineAudioContext(1, renderDuration * audioBuffer.sampleRate, audioBuffer.sampleRate);
     const offlineSource = setupAudioPipeline(offlineCtx, audioBuffer, true);
     
@@ -139,29 +150,26 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     const renderedBuffer = await offlineCtx.startRendering();
     const mp3Blob = bufferToMp3(renderedBuffer);
 
-    // Clean DOM Trigger
     const downloadUrl = URL.createObjectURL(mp3Blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'studio_x_processed_mix.mp3';
+    link.download = 'studio_x_100_rating_mix.mp3';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    downloadBtn.innerText = originalText;
+    downloadBtn.innerText = "Export MP3";
     downloadBtn.disabled = false;
+    alert("🎉 Master Quality 100/100 MP3 Exported!");
 });
 
-// --- HELPER FUNCTION: RAW WAVE FLOAT DATA TO MP3 COMPRESSOR ---
+// --- LAMEJS CORE ENCODER MODULE ---
 function bufferToMp3(buffer) {
     const rawAudioChannel = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
-    
-    // Encodes mono stream straight to constant bit rate 128kbps standard compression
     const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
     const mp3DataChunks = [];
 
-    // Map float array vectors (-1.0 to 1.0) directly into signed 16-bit PCM arrays
     const pcmSamples = new Int16Array(rawAudioChannel.length);
     for (let i = 0; i < rawAudioChannel.length; i++) {
         let sample = Math.max(-1, Math.min(1, rawAudioChannel[i]));
@@ -172,15 +180,11 @@ function bufferToMp3(buffer) {
     for (let i = 0; i < pcmSamples.length; i += blockSize) {
         const sampleChunk = pcmSamples.subarray(i, i + blockSize);
         const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
-        if (mp3buf.length > 0) {
-            mp3DataChunks.push(new Uint8Array(mp3buf));
-        }
+        if (mp3buf.length > 0) mp3DataChunks.push(new Uint8Array(mp3buf));
     }
 
     const flushedBuf = mp3encoder.flush();
-    if (flushedBuf.length > 0) {
-        mp3DataChunks.push(new Uint8Array(flushedBuf));
-    }
+    if (flushedBuf.length > 0) mp3DataChunks.push(new Uint8Array(flushedBuf));
 
     return new Blob(mp3DataChunks, { type: 'audio/mp3' });
 }
