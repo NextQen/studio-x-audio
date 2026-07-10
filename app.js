@@ -11,50 +11,49 @@ document.getElementById('audioFile').addEventListener('change', async (e) => {
 
     audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
         audioBuffer = buffer;
-        alert("🚀 Pure Clean Studio Engine Operational! (Sarsarahat Fixed)");
+        alert("✨ Pristine Zero-Loop Engine Loaded! (Sarsarahat Completely Blocked)");
     });
 });
 
-// --- PARALLEL SPRING-CONCERT REVERB MATRIX (NO INTERNAL FEEDBACK LOOP) ---
+// --- AUDIOALTER MULTI-TAP STUDIO ENGINE (NO FEEDBACK LOOPS) ---
 function setupAudioPipeline(context, buffer, isExporting = false) {
     const source = context.createBufferSource();
     source.buffer = buffer;
 
-    // 1. PERFECT SLOWED SPEED (Pitch Drop Correlation)
+    // 1. PERFECT SLOWED SPEED (Pitch and Tempo drop automatically)
     const speedVal = parseFloat(document.getElementById('speed').value);
     source.playbackRate.setValueAtTime(speedVal, context.currentTime);
 
-    // 2. EXTRA WARM LO-FI EQUALIZER (Thick Sub Bass & Smooth Treble)
+    // 2. TRUE LO-FI EQUALIZER (Warm Analog Signature)
     const heavyBass = context.createBiquadFilter();
     heavyBass.type = "lowshelf";
-    heavyBass.frequency.value = 110; // Deep sub-bass thumping
-    heavyBass.gain.value = parseFloat(document.getElementById('eqBass').value) + 5; 
+    heavyBass.frequency.value = 130; 
+    heavyBass.gain.value = parseFloat(document.getElementById('eqBass').value) + 6; // Heavy low-end punch
 
     const midWarmth = context.createBiquadFilter();
     midWarmth.type = "peaking";
-    midWarmth.Q.value = 0.6;
-    midWarmth.frequency.value = 900;
+    midWarmth.Q.value = 0.5;
+    midWarmth.frequency.value = 1000;
     midWarmth.gain.value = parseFloat(document.getElementById('eqMid').value);
 
-    const trebleSmooth = context.createBiquadFilter();
-    trebleSmooth.type = "highshelf";
-    trebleSmooth.frequency.value = 3200;
-    // Treble ko halka down rakhenge taaki processing aur smoothly analog sound kare
-    trebleSmooth.gain.value = parseFloat(document.getElementById('eqTreble').value) - 2; 
+    const lofiHighCut = context.createBiquadFilter();
+    lofiHighCut.type = "lowpass"; 
+    // Harsh digital elements ko 3200Hz par hi lock kar diya taaki chubhnewali aawaz na aaye
+    lofiHighCut.frequency.value = 3200; 
 
     source.connect(heavyBass);
     heavyBass.connect(midWarmth);
-    midWarmth.connect(trebleSmooth);
-    let masterAudio = trebleSmooth;
+    midWarmth.connect(lofiHighCut);
+    let masterAudio = lofiHighCut;
 
-    // 3. FULL MASTER DYNAMICS COMPRESSOR (Cleans any residual hiss)
+    // 3. MASTER STUDIO DYNAMICS CONTROL
     const noiseEnabled = document.getElementById('noiseToggle').checked;
     if (noiseEnabled) {
         const studioComp = context.createDynamicsCompressor();
-        studioComp.threshold.setValueAtTime(-38, context.currentTime);
-        studioComp.knee.setValueAtTime(12, context.currentTime);
-        studioComp.ratio.setValueAtTime(6, context.currentTime);
-        studioComp.attack.setValueAtTime(0.004, context.currentTime);
+        studioComp.threshold.setValueAtTime(-35, context.currentTime);
+        studioComp.knee.setValueAtTime(10, context.currentTime);
+        studioComp.ratio.setValueAtTime(4, context.currentTime);
+        studioComp.attack.setValueAtTime(0.005, context.currentTime);
         studioComp.release.setValueAtTime(0.06, context.currentTime);
         
         masterAudio.connect(studioComp);
@@ -62,73 +61,45 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     }
 
     // ================================================================
-    // 4. THE MASSIVE STUDIO VENUE & SPRING HYBRID GRID
+    // 4. THE ZERO-LOOP MASSIVE STUDIO SPACE ENGINE (No Feedback = No Hiss)
     // ================================================================
-    // Sarsarahat hatane ke liye humne loops ko poora block kar diya hai.
-    // Ab teen massive alag-alag channels PARALLEL chalenge bina ek doosre ko disturb kiye.
+    // Koi loop nahi hai! Hum 5 alag-alag lambe time delays ko side-by-side
+    // chalayenge. Ye bina sarsarahat ke ek anant (infinite) room scale dega.
     
     const reverbMix = parseFloat(document.getElementById('reverb').value);
-    
-    // Channel A: Massive Hall Depth (Long 680ms Delay)
-    const delayA = context.createDelay();
-    delayA.delayTime.value = 0.68;
-    const feedbackA = context.createGain();
-    feedbackA.gain.value = reverbMix * 0.50;
+    const wetGain = context.createGain();
+    wetGain.gain.value = reverbMix * 1.8; // Amplified for massive arena depth
 
-    // Channel B: Massive Studio Width (Long 820ms Delay)
-    const delayB = context.createDelay();
-    delayB.delayTime.value = 0.82;
-    const feedbackB = context.createGain();
-    feedbackB.gain.value = reverbMix * 0.45;
-
-    // Channel C: THE SPRING REVERB RESONANCE (Fast Metallic Bounce Matrix)
-    // Dynamic feedback to recreate the vintage tension string reverb feel
-    const springDelay = context.createDelay();
-    springDelay.delayTime.value = 0.035; // Short bouncy time for physical spring feeling
-    const springFeedback = context.createGain();
-    springFeedback.gain.value = 0.55; // Metallic spring reflection dampening factor
-
-    // Connect Spring Pathway internally (isolated from the main delay lanes to stop hiss)
-    springDelay.connect(springFeedback);
-    springFeedback.connect(springDelay);
-
-    // Reverb Quality Dampening Filter (Keeps the reverb cloud extremely soft & backgrounded)
+    // Filters jo sirf reverb tail ko deep aur fluid banayenge
     const reverbFilter = context.createBiquadFilter();
     reverbFilter.type = "lowpass";
-    reverbFilter.frequency.value = 1100; // Deep tone cutoff
+    reverbFilter.frequency.value = 1200; 
 
-    // ROUTING: Connect audio source directly into the parallel channels
-    // Lane 1 (Massive depth)
-    masterAudio.connect(delayA);
-    delayA.connect(reverbFilter);
-    reverbFilter.connect(feedbackA);
-    feedbackA.connect(delayA); // Straight isolated loop
+    // 5 Multi-Tap Parallel Delay Points (Massive Studio Architecture)
+    const delayTimes = [0.35, 0.52, 0.68, 0.85, 1.15]; // Bada studio scaling upto 1.15 seconds
+    const tapGains = [0.45, 0.40, 0.35, 0.30, 0.25];   // Distant fading effect
 
-    // Lane 2 (Extreme width)
-    masterAudio.connect(delayB);
-    delayB.connect(reverbFilter);
-    reverbFilter.connect(feedbackB);
-    feedbackB.connect(delayB); // Straight isolated loop
+    delayTimes.forEach((time, index) => {
+        const delayNode = context.createDelay();
+        delayNode.delayTime.value = time;
 
-    // Lane 3 (Spring texture injection)
-    masterAudio.connect(springDelay);
+        const gainNode = context.createGain();
+        gainNode.gain.value = tapGains[index];
 
-    // Master Dry (Vocals) / Wet (Space) Node Balancing
+        // Pipeline: Master -> Delay -> Tone Filter -> Gain -> Main Wet Output
+        masterAudio.connect(delayNode);
+        delayNode.connect(reverbFilter);
+        reverbFilter.connect(gainNode);
+        gainNode.connect(wetGain);
+    });
+
+    // 5. MASTER DRY/WET MIX CLOSURE
     const dryGain = context.createGain();
-    const wetGain = context.createGain();
+    dryGain.gain.value = 1.0; // Clean, crystal clear upfront vocals
 
-    dryGain.gain.value = 1.0; // Vocal tight, upfront, singular
-    wetGain.gain.value = reverbMix * 1.6; // Heavy atmosphere gain
-
-    // Route all parallel tails safely to the master wet output channel
-    feedbackA.connect(wetGain);
-    feedbackB.connect(wetGain);
-    springFeedback.connect(wetGain);
-
-    // Route clean vocals path
     masterAudio.connect(dryGain);
 
-    // Final Stage Summation
+    // Final Stage Routing
     const destination = isExporting ? context.destination : audioCtx.destination;
     dryGain.connect(destination);
     wetGain.connect(destination);
@@ -136,9 +107,9 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     return source;
 }
 
-// --- COMMAND EXECUTION RUNNERS ---
+// --- RUNNERS AND CONTROLLERS ---
 document.getElementById('playBtn').addEventListener('click', () => {
-    if (!audioBuffer) return alert("Pehle file choose karo bhai!");
+    if (!audioBuffer) return alert("Pehle song upload karo!");
     if (sourceNode) { try { sourceNode.stop(); } catch(e) {} }
 
     sourceNode = setupAudioPipeline(audioCtx, audioBuffer, false);
@@ -146,14 +117,14 @@ document.getElementById('playBtn').addEventListener('click', () => {
 });
 
 document.getElementById('downloadBtn').addEventListener('click', async () => {
-    if (!audioBuffer) return alert("Pehle audio upload karein!");
+    if (!audioBuffer) return alert("Pehle file check karo!");
 
     const downloadBtn = document.getElementById('downloadBtn');
     downloadBtn.innerText = "Master Rendering...";
     downloadBtn.disabled = true;
 
     const speedVal = parseFloat(document.getElementById('speed').value);
-    const renderDuration = (audioBuffer.duration / speedVal) + 9; // High headspace for massive tails
+    const renderDuration = (audioBuffer.duration / speedVal) + 8; 
 
     const offlineCtx = new OfflineAudioContext(1, renderDuration * audioBuffer.sampleRate, audioBuffer.sampleRate);
     const offlineSource = setupAudioPipeline(offlineCtx, audioBuffer, true);
@@ -166,17 +137,17 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     const downloadUrl = URL.createObjectURL(mp3Blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'studio_x_clean_grand_mix.mp3';
+    link.download = 'studio_x_pristine_master.mp3';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     downloadBtn.innerText = "Export MP3";
     downloadBtn.disabled = false;
-    alert("🎉 Hiss-Free Premium Master MP3 Exported!");
+    alert("🎉 Pristine Master MP3 Downloaded!");
 });
 
-// --- LAMEJS STREAM AUDIO ENGINE ---
+// --- LAMEJS STREAM COMPRESSION ENGINE ---
 function bufferToMp3(buffer) {
     const rawAudioChannel = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
