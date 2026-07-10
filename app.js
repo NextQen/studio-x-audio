@@ -2,6 +2,26 @@ let audioCtx;
 let audioBuffer;
 let sourceNode;
 
+// --- MASSIVE ARENA CONCERT HALL IMPULSE MATRIX ---
+function createMassiveArenaImpulse(context, duration = 5.5, decay = 2.2) {
+    const sampleRate = context.sampleRate;
+    const length = sampleRate * duration;
+    const impulse = context.createBuffer(2, length, sampleRate);
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+
+    for (let i = 0; i < length; i++) {
+        const percent = i / length;
+        // Slow decay curve mimics massive physical sound scattering across hundreds of meters
+        const damping = Math.pow(1 - percent, decay);
+        
+        // Pseudo-random dense ambient distribution for ultra-smooth tail
+        left[i] = (Math.random() * 2 - 1) * damping;
+        right[i] = (Math.random() * 2 - 1) * damping;
+    }
+    return impulse;
+}
+
 document.getElementById('audioFile').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -11,95 +31,87 @@ document.getElementById('audioFile').addEventListener('change', async (e) => {
 
     audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
         audioBuffer = buffer;
-        alert("✨ Pristine Zero-Loop Engine Loaded! (Sarsarahat Completely Blocked)");
+        alert("💎 Massive Arena Studio Engine Operational!");
     });
 });
 
-// --- AUDIOALTER MULTI-TAP STUDIO ENGINE (NO FEEDBACK LOOPS) ---
+// --- THE GRAND ARENA PIPELINE ---
 function setupAudioPipeline(context, buffer, isExporting = false) {
     const source = context.createBufferSource();
     source.buffer = buffer;
 
-    // 1. PERFECT SLOWED SPEED (Pitch and Tempo drop automatically)
+    // 1. TEMPO LAYER
     const speedVal = parseFloat(document.getElementById('speed').value);
     source.playbackRate.setValueAtTime(speedVal, context.currentTime);
 
-    // 2. TRUE LO-FI EQUALIZER (Warm Analog Signature)
-    const heavyBass = context.createBiquadFilter();
-    heavyBass.type = "lowshelf";
-    heavyBass.frequency.value = 130; 
-    heavyBass.gain.value = parseFloat(document.getElementById('eqBass').value) + 6; // Heavy low-end punch
+    // 2. EQUALIZER BANDS (Deep Lo-Fi Base Preset)
+    const bassEQ = context.createBiquadFilter();
+    bassEQ.type = "lowshelf";
+    bassEQ.frequency.value = 140;
+    bassEQ.gain.value = parseFloat(document.getElementById('eqBass').value);
 
-    const midWarmth = context.createBiquadFilter();
-    midWarmth.type = "peaking";
-    midWarmth.Q.value = 0.5;
-    midWarmth.frequency.value = 1000;
-    midWarmth.gain.value = parseFloat(document.getElementById('eqMid').value);
+    const midEQ = context.createBiquadFilter();
+    midEQ.type = "peaking";
+    midEQ.Q.value = 0.7;
+    midEQ.frequency.value = 1100;
+    midEQ.gain.value = parseFloat(document.getElementById('eqMid').value);
 
-    const lofiHighCut = context.createBiquadFilter();
-    lofiHighCut.type = "lowpass"; 
-    // Harsh digital elements ko 3200Hz par hi lock kar diya taaki chubhnewali aawaz na aaye
-    lofiHighCut.frequency.value = 3200; 
+    const trebleEQ = context.createBiquadFilter();
+    trebleEQ.type = "highshelf";
+    trebleEQ.frequency.value = 3800;
+    trebleEQ.gain.value = parseFloat(document.getElementById('eqTreble').value);
 
-    source.connect(heavyBass);
-    heavyBass.connect(midWarmth);
-    midWarmth.connect(lofiHighCut);
-    let masterAudio = lofiHighCut;
+    source.connect(bassEQ);
+    bassEQ.connect(midEQ);
+    midEQ.connect(trebleEQ);
+    let currentMaster = trebleEQ;
 
-    // 3. MASTER STUDIO DYNAMICS CONTROL
+    // 3. NOISE CONTROL GATE
     const noiseEnabled = document.getElementById('noiseToggle').checked;
     if (noiseEnabled) {
         const studioComp = context.createDynamicsCompressor();
-        studioComp.threshold.setValueAtTime(-35, context.currentTime);
-        studioComp.knee.setValueAtTime(10, context.currentTime);
+        studioComp.threshold.setValueAtTime(-40, context.currentTime);
+        studioComp.knee.setValueAtTime(15, context.currentTime);
         studioComp.ratio.setValueAtTime(4, context.currentTime);
         studioComp.attack.setValueAtTime(0.005, context.currentTime);
         studioComp.release.setValueAtTime(0.06, context.currentTime);
         
-        masterAudio.connect(studioComp);
-        masterAudio = studioComp;
+        currentMaster.connect(studioComp);
+        currentMaster = studioComp;
     }
 
-    // ================================================================
-    // 4. THE ZERO-LOOP MASSIVE STUDIO SPACE ENGINE (No Feedback = No Hiss)
-    // ================================================================
-    // Koi loop nahi hai! Hum 5 alag-alag lambe time delays ko side-by-side
-    // chalayenge. Ye bina sarsarahat ke ek anant (infinite) room scale dega.
-    
-    const reverbMix = parseFloat(document.getElementById('reverb').value);
-    const wetGain = context.createGain();
-    wetGain.gain.value = reverbMix * 1.8; // Amplified for massive arena depth
-
-    // Filters jo sirf reverb tail ko deep aur fluid banayenge
-    const reverbFilter = context.createBiquadFilter();
-    reverbFilter.type = "lowpass";
-    reverbFilter.frequency.value = 1200; 
-
-    // 5 Multi-Tap Parallel Delay Points (Massive Studio Architecture)
-    const delayTimes = [0.35, 0.52, 0.68, 0.85, 1.15]; // Bada studio scaling upto 1.15 seconds
-    const tapGains = [0.45, 0.40, 0.35, 0.30, 0.25];   // Distant fading effect
-
-    delayTimes.forEach((time, index) => {
-        const delayNode = context.createDelay();
-        delayNode.delayTime.value = time;
-
-        const gainNode = context.createGain();
-        gainNode.gain.value = tapGains[index];
-
-        // Pipeline: Master -> Delay -> Tone Filter -> Gain -> Main Wet Output
-        masterAudio.connect(delayNode);
-        delayNode.connect(reverbFilter);
-        reverbFilter.connect(gainNode);
-        gainNode.connect(wetGain);
-    });
-
-    // 5. MASTER DRY/WET MIX CLOSURE
+    // 4. BALANCED DRY/WET MATRIX
     const dryGain = context.createGain();
-    dryGain.gain.value = 1.0; // Clean, crystal clear upfront vocals
+    const wetGain = context.createGain();
 
-    masterAudio.connect(dryGain);
+    const reverbMix = parseFloat(document.getElementById('reverb').value);
+    dryGain.gain.value = 1.0; 
+    // Amplified wet signal mapping to handle the massive room size reflection power
+    wetGain.gain.value = reverbMix * 1.6; 
 
-    // Final Stage Routing
+    // 5. CONVOLVER SPACE ENGINE
+    const convolver = context.createConvolver();
+    convolver.buffer = createMassiveArenaImpulse(context, 5.5, 2.2);
+
+    // Reverb Quality High & Low Filters
+    const reverbHighPass = context.createBiquadFilter();
+    reverbHighPass.type = "highpass";
+    reverbHighPass.frequency.value = 220; 
+
+    const reverbLowPass = context.createBiquadFilter();
+    reverbLowPass.type = "lowpass";
+    // Raised to 1400Hz to capture large room air reflections properly
+    reverbLowPass.frequency.value = 1400; 
+
+    // Pipeline Connections (Zero-Delay Single Vocal Structure)
+    currentMaster.connect(reverbHighPass);
+    reverbHighPass.connect(reverbLowPass);
+    reverbLowPass.connect(convolver);
+    convolver.connect(wetGain);
+
+    currentMaster.connect(dryGain);
+
+    // Terminal Output
     const destination = isExporting ? context.destination : audioCtx.destination;
     dryGain.connect(destination);
     wetGain.connect(destination);
@@ -107,9 +119,9 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     return source;
 }
 
-// --- RUNNERS AND CONTROLLERS ---
+// --- RUNNERS AND TRIGGERS ---
 document.getElementById('playBtn').addEventListener('click', () => {
-    if (!audioBuffer) return alert("Pehle song upload karo!");
+    if (!audioBuffer) return alert("Pehle file load karo!");
     if (sourceNode) { try { sourceNode.stop(); } catch(e) {} }
 
     sourceNode = setupAudioPipeline(audioCtx, audioBuffer, false);
@@ -124,7 +136,7 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     downloadBtn.disabled = true;
 
     const speedVal = parseFloat(document.getElementById('speed').value);
-    const renderDuration = (audioBuffer.duration / speedVal) + 8; 
+    const renderDuration = (audioBuffer.duration / speedVal) + 8; // Extra head space for mega tail decay
 
     const offlineCtx = new OfflineAudioContext(1, renderDuration * audioBuffer.sampleRate, audioBuffer.sampleRate);
     const offlineSource = setupAudioPipeline(offlineCtx, audioBuffer, true);
@@ -137,14 +149,14 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     const downloadUrl = URL.createObjectURL(mp3Blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'studio_x_pristine_master.mp3';
+    link.download = 'studio_x_grand_arena.mp3';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     downloadBtn.innerText = "Export MP3";
     downloadBtn.disabled = false;
-    alert("🎉 Pristine Master MP3 Downloaded!");
+    alert("🎉 Massive Arena Master MP3 Downloaded!");
 });
 
 // --- LAMEJS STREAM COMPRESSION ENGINE ---
