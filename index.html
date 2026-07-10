@@ -12,7 +12,7 @@
     <div class="max-w-xl w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl">
         <header class="text-center mb-6">
             <h1 class="text-3xl font-extrabold text-indigo-400 tracking-wide">🎶 Studio X Audio Lab</h1>
-            <p class="text-xs text-gray-400 mt-1">One-Click Multi-Effect Pipeline (Audioalter Specs)</p>
+            <p class="text-xs text-gray-400 mt-1">Preset Loaded: 0.8x Speed & Pitch | 70% Reverb</p>
         </header>
         
         <div class="mb-6">
@@ -26,13 +26,13 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs text-gray-400 block mb-1">Tempo / Speed</label>
-                        <input type="range" id="speed" min="0.5" max="1.0" step="0.01" value="0.85" class="w-full accent-indigo-500">
-                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>0.5x</span><span class="text-indigo-300 font-semibold">Audioalter Default (0.85x)</span><span>1.0x</span></div>
+                        <input type="range" id="speed" min="0.5" max="1.0" step="0.01" value="0.80" class="w-full accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>0.5x</span><span class="text-indigo-300 font-semibold">0.80x Active</span><span>1.0x</span></div>
                     </div>
                     <div>
                         <label class="text-xs text-gray-400 block mb-1">Reverb Size (Room Scale)</label>
-                        <input type="range" id="reverb" min="0" max="1" step="0.05" value="0.60" class="w-full accent-indigo-500">
-                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>Dry</span><span class="text-indigo-300 font-semibold">Deep Space Tail</span><span>100% Wet</span></div>
+                        <input type="range" id="reverb" min="0" max="1" step="0.05" value="0.70" class="w-full accent-indigo-500">
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-0.5"><span>Dry</span><span class="text-indigo-300 font-semibold">70% Active</span><span>100%</span></div>
                     </div>
                 </div>
             </div>
@@ -41,19 +41,16 @@
                 <h3 class="text-sm font-bold text-indigo-400 mb-3 tracking-wide uppercase">2. 3-Band Studio Equalizer</h3>
                 <div class="grid grid-cols-3 gap-3">
                     <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
-                        <label class="text-[11px] text-gray-400 block mb-1">🎸 Bass (150Hz)</label>
+                        <label class="text-[11px] text-gray-400 block mb-1">🎸 Bass (140Hz)</label>
                         <input type="range" id="eqBass" min="-15" max="15" step="1" value="6" class="w-full accent-indigo-500">
-                        <span class="text-[9px] text-gray-500">Punchy Lows</span>
                     </div>
                     <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
-                        <label class="text-[11px] text-gray-400 block mb-1">🎤 Mid (1kHz)</label>
+                        <label class="text-[11px] text-gray-400 block mb-1">🎤 Mid (1.1kHz)</label>
                         <input type="range" id="eqMid" min="-15" max="15" step="1" value="0" class="w-full accent-indigo-500">
-                        <span class="text-[9px] text-gray-500">Vocal Clarity</span>
                     </div>
                     <div class="text-center bg-gray-900/50 p-2 rounded-lg border border-gray-800">
-                        <label class="text-[11px] text-gray-400 block mb-1">✨ Treble (4kHz)</label>
-                        <input type="range" id="eqTreble" min="-15" max="15" step="1" value="-2" class="w-full accent-indigo-500">
-                        <span class="text-[9px] text-gray-500">Anti-Harsh</span>
+                        <label class="text-[11px] text-gray-400 block mb-1">✨ Treble (3.8kHz)</label>
+                        <input type="range" id="eqTreble" min="-15" max="15" step="1" value="0" class="w-full accent-indigo-500">
                     </div>
                 </div>
             </div>
@@ -61,7 +58,6 @@
             <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 flex items-center justify-between">
                 <div>
                     <h3 class="text-sm font-bold text-indigo-400 tracking-wide uppercase">3. Intelligent Noise Reducer</h3>
-                    <p class="text-[10px] text-gray-500 mt-0.5">Auto-cleans background hiss & static rumble</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="noiseToggle" checked class="sr-only peer">
@@ -71,8 +67,8 @@
         </div>
 
         <div class="mt-8 flex gap-4">
-            <button id="playBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg active:scale-[0.98]">Play Preview</button>
-            <button id="downloadBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg active:scale-[0.98]">Export MP3</button>
+            <button id="playBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg">Play Preview</button>
+            <button id="downloadBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg">Export MP3</button>
         </div>
     </div>
 
