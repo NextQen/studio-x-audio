@@ -2,8 +2,8 @@ let audioCtx;
 let audioBuffer;
 let sourceNode;
 
-// Advanced Velvet Noise Matrix - Clean Reverb Tail (Zero Echo Artifacts)
-function createPureConcertImpulse(context, duration = 3.5, decay = 5.0) {
+// --- MASSIVE ARENA CONCERT HALL IMPULSE MATRIX ---
+function createMassiveArenaImpulse(context, duration = 5.5, decay = 2.2) {
     const sampleRate = context.sampleRate;
     const length = sampleRate * duration;
     const impulse = context.createBuffer(2, length, sampleRate);
@@ -12,8 +12,10 @@ function createPureConcertImpulse(context, duration = 3.5, decay = 5.0) {
 
     for (let i = 0; i < length; i++) {
         const percent = i / length;
-        // Hyperbolic curve to ensure reverb smoothly decays without creating a "double sound"
+        // Slow decay curve mimics massive physical sound scattering across hundreds of meters
         const damping = Math.pow(1 - percent, decay);
+        
+        // Pseudo-random dense ambient distribution for ultra-smooth tail
         left[i] = (Math.random() * 2 - 1) * damping;
         right[i] = (Math.random() * 2 - 1) * damping;
     }
@@ -29,20 +31,20 @@ document.getElementById('audioFile').addEventListener('change', async (e) => {
 
     audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
         audioBuffer = buffer;
-        alert("💎 Phase-Aligned Studio Engine Operational! (Vocals Fixed)");
+        alert("💎 Massive Arena Studio Engine Operational!");
     });
 });
 
-// --- THE PERFECT SINGLE-VOCAL PRODUCTION PIPELINE ---
+// --- THE GRAND ARENA PIPELINE ---
 function setupAudioPipeline(context, buffer, isExporting = false) {
     const source = context.createBufferSource();
     source.buffer = buffer;
 
-    // 1. TEMPO CHANGER (Perfect Pitch Drop Correlation)
+    // 1. TEMPO LAYER
     const speedVal = parseFloat(document.getElementById('speed').value);
     source.playbackRate.setValueAtTime(speedVal, context.currentTime);
 
-    // 2. EQUALIZER SECTION (Warm Signature Analog Shape)
+    // 2. EQUALIZER BANDS (Deep Lo-Fi Base Preset)
     const bassEQ = context.createBiquadFilter();
     bassEQ.type = "lowshelf";
     bassEQ.frequency.value = 140;
@@ -51,7 +53,7 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     const midEQ = context.createBiquadFilter();
     midEQ.type = "peaking";
     midEQ.Q.value = 0.7;
-    midEQ.frequency.value = 1000;
+    midEQ.frequency.value = 1100;
     midEQ.gain.value = parseFloat(document.getElementById('eqMid').value);
 
     const trebleEQ = context.createBiquadFilter();
@@ -59,13 +61,12 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
     trebleEQ.frequency.value = 3800;
     trebleEQ.gain.value = parseFloat(document.getElementById('eqTreble').value);
 
-    // Link EQ in Series
     source.connect(bassEQ);
     bassEQ.connect(midEQ);
     midEQ.connect(trebleEQ);
     let currentMaster = trebleEQ;
 
-    // 3. AUTOMATIC STUDIO COMPRESSOR (Glues Dry and Wet elements)
+    // 3. NOISE CONTROL GATE
     const noiseEnabled = document.getElementById('noiseToggle').checked;
     if (noiseEnabled) {
         const studioComp = context.createDynamicsCompressor();
@@ -79,37 +80,38 @@ function setupAudioPipeline(context, buffer, isExporting = false) {
         currentMaster = studioComp;
     }
 
-    // 4. ZERO-DELAY MIXING GRID (Fixes the Double Vocal Bug)
+    // 4. BALANCED DRY/WET MATRIX
     const dryGain = context.createGain();
     const wetGain = context.createGain();
 
     const reverbMix = parseFloat(document.getElementById('reverb').value);
-    dryGain.gain.value = 1.0; // Keep the original voice full power, tight, and single
-    wetGain.gain.value = reverbMix * 0.95;
+    dryGain.gain.value = 1.0; 
+    // Amplified wet signal mapping to handle the massive room size reflection power
+    wetGain.gain.value = reverbMix * 1.6; 
 
-    // 5. VOCAL-ISOLATING REVERB PATHWAY
+    // 5. CONVOLVER SPACE ENGINE
     const convolver = context.createConvolver();
-    convolver.buffer = createPureConcertImpulse(context, 3.5, 5.0);
+    convolver.buffer = createMassiveArenaImpulse(context, 5.5, 2.2);
 
-    // Reverb Isolation Filters (Cuts out muddy bass and sharp vocal transients from the reverb tail)
+    // Reverb Quality High & Low Filters
     const reverbHighPass = context.createBiquadFilter();
     reverbHighPass.type = "highpass";
-    reverbHighPass.frequency.value = 200; // Removes bass rumble from reverb
+    reverbHighPass.frequency.value = 180; 
 
     const reverbLowPass = context.createBiquadFilter();
     reverbLowPass.type = "lowpass";
-    reverbLowPass.frequency.value = 850; // Audioalter dark lofi aesthetic sweet-spot
+    // Raised to 1400Hz to capture large room air reflections properly
+    reverbLowPass.frequency.value = 1400; 
 
-    // Connect Reverb Pathway without any Delay Node
+    // Pipeline Connections (Zero-Delay Single Vocal Structure)
     currentMaster.connect(reverbHighPass);
     reverbHighPass.connect(reverbLowPass);
     reverbLowPass.connect(convolver);
     convolver.connect(wetGain);
 
-    // Direct path for clean vocals
     currentMaster.connect(dryGain);
 
-    // 6. FINAL TERMINAL SUMMING
+    // Terminal Output
     const destination = isExporting ? context.destination : audioCtx.destination;
     dryGain.connect(destination);
     wetGain.connect(destination);
@@ -127,14 +129,14 @@ document.getElementById('playBtn').addEventListener('click', () => {
 });
 
 document.getElementById('downloadBtn').addEventListener('click', async () => {
-    if (!audioBuffer) return alert("File choose karein pehle!");
+    if (!audioBuffer) return alert("Pehle file check karo!");
 
     const downloadBtn = document.getElementById('downloadBtn');
     downloadBtn.innerText = "Master Rendering...";
     downloadBtn.disabled = true;
 
     const speedVal = parseFloat(document.getElementById('speed').value);
-    const renderDuration = (audioBuffer.duration / speedVal) + 6;
+    const renderDuration = (audioBuffer.duration / speedVal) + 8; // Extra head space for mega tail decay
 
     const offlineCtx = new OfflineAudioContext(1, renderDuration * audioBuffer.sampleRate, audioBuffer.sampleRate);
     const offlineSource = setupAudioPipeline(offlineCtx, audioBuffer, true);
@@ -147,17 +149,17 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     const downloadUrl = URL.createObjectURL(mp3Blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = 'studio_x_clean_master.mp3';
+    link.download = 'studio_x_grand_arena.mp3';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     downloadBtn.innerText = "Export MP3";
     downloadBtn.disabled = false;
-    alert("🎉 Crystal Clear Single-Vocal MP3 Downloaded!");
+    alert("🎉 Massive Arena Master MP3 Downloaded!");
 });
 
-// --- FAST LAMEJS MONO PACKER ---
+// --- LAMEJS STREAM COMPRESSION ENGINE ---
 function bufferToMp3(buffer) {
     const rawAudioChannel = buffer.getChannelData(0);
     const sampleRate = buffer.sampleRate;
